@@ -90,15 +90,16 @@ char* product(char* x, char* y) {
 	return product;
 }
 
-//copy bnum bit by bit from 0 to lb
-//onto factor2 indices idx downto idx-lb 
-//the right bound being exclusive.
-void* _copy_(char* factor2, long idx, char* bnum, long lb) {
-        long cnt = 0;
-	for (int i = idx; i > idx-lb; --i) {
-		factor2[idx] = bnum[cnt++];
-	}
-	return 0;
+//reverse a string
+char* strrev(char* x) { 
+    char* s = strdup(x);
+    long l = strlen(s);
+    for (int i = 0; i < l / 2; ++i) {
+	    char t = s[i];
+	    s[i] = s[l - 1 - i];
+	    s[l - 1 - i] = t;
+    }
+    return s;
 }
 
 //This function ``searches'' for the digits of 
@@ -147,9 +148,9 @@ bool disambiguate(char* num, long l, long& ctr, char* tmpfile1, char* tmpfile2, 
 		bool _ptr1 = (strchr((char*)"2468", pp) != NULL);
 		bool ptr2 = (strchr((char*)"2468", ee) != NULL);
 		bool _ptr2 = (strchr((char*)"13579", ee) != NULL);
-		bool isZero1 = (pp == num[ctr]);
+		bool isZero1 = (pp == '0');
 		bool isZero2 = (ee == '0');
-		if (isZero1 && ((ptr1 && ptr2) || (_ptr1 && _ptr2) || ((ptr1 || _ptr1) && isZero2))) { 
+		if ((pp == num[ctr]) && ((ptr1 && ptr2) || (_ptr1 && _ptr2) || ((ptr1 || _ptr1 || isZero1) && isZero2))) { 
 			//match found
 			++ctr;
 		}
@@ -175,11 +176,12 @@ int main(int argc, char* argv[]) {
 	_bin(num, l_bin);
 	char* factor1 = (char*) calloc(l_bin, sizeof(char));
 	char* _factor1 = factor1;
-					factor1[l_bin] = '\0';
+	factor1[l_bin] = '\0';
 	char* factor2 = (char*) calloc(l_bin, sizeof(char));
-					factor2[l_bin] = '\0';
+	char* _factor2 = factor2;
+	factor2[l_bin] = '\0';
 	int t = 0;
-        long counter = 0;
+	long counter = 0;
 	long idx1 = 0, idx2 = l_bin - 1;
 	char tmpfile1[L_tmpnam + 1];
 	tmpnam(tmpfile1);
@@ -215,23 +217,39 @@ int main(int argc, char* argv[]) {
 			fseek(tmp2, fpos, SEEK_SET);
 			if (success) {
 				//convert to binary
-				char* bnum = _bin(counter);
-				long lb = strlen(bnum);
 				if (t == 0) {
 					//direct copy
-					strcpy(factor1+idx1, bnum);
-					idx1 += lb;
+					cout << "Here1\n";
+					if (counter > 0) {
+						char* bnum = _bin(counter);
+						long lb = strlen(bnum);
+						cout << "counter:\t"<< counter << "\t" << t << endl;
+						strcpy(factor1+idx1, bnum);
+						idx1 += lb;
+						factor1[idx1] = '\0';
+						counter = 0;
+						t = 1 - t;
+					}
 				} else if (t == 1) {
-					_copy_(factor2, idx2, bnum, lb);
-					idx2 -= lb;
+					if (counter > 0) {
+						char* bnum = _bin(counter);
+						long lb = strlen(bnum);
+						cout << "counter:\t"<< counter << "\t" << t << endl;
+						cout << "Here2\n";
+						strcpy(factor2+idx2, bnum);
+						idx2 += lb;
+						factor2[idx2] = '\0';
+						counter = 0;
+						t = 1 - t;
+					}
 				}
 				//reset for the next cycle
-				counter = 0;
-				t = 1 - t;
 			}
 		}
 		char* _int_factor1 = _int(_factor1);
-		char* _int_factor2 = _int(factor2+idx2);
+		char* tmp_factor = strrev(_factor2);
+		char* _int_factor2 = _int(tmp_factor);
+		free(tmp_factor);
 		char* _prod_ = product(_int_factor1, _int_factor2);
 		cout << _prod_ << endl;
 		cout << _int_factor1 << endl;
