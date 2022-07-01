@@ -115,6 +115,8 @@ bool disambiguate(char* num, long l, long& ctr, char* tmpfile1, char* tmpfile2) 
 	char tmpfile3[L_tmpnam + 1];
 	tmpnam(tmpfile3);
 	FILE* tmp3 = fopen64(tmpfile3, "w");
+	//read from tmpfile2 and write it
+	//in reverse to tmpfile3.
 	int ret = 0;
 	char pp = 0, ee = 0;
 	long cnt = 1;
@@ -130,13 +132,16 @@ bool disambiguate(char* num, long l, long& ctr, char* tmpfile1, char* tmpfile2) 
 	FILE* tmp1 = fopen64(tmpfile1, "r");
 	long _ctr = ctr;
 	while (1) {
-		fscanf(tmp1, "%c", &pp);
-		fscanf(tmp3, "%c", &ee);
+		int ret1 = fscanf(tmp1, "%c", &pp);
+		int ret2 = fscanf(tmp3, "%c", &ee);
+		if (ret1 == EOF) {
+			break;
+		}
 		char* ptr1 = strchr((char*)"1357", pp);
 		char* ptr2 = strchr((char*)"2468", ee);
 		bool isZero1 = (pp == num[ctr]);
 		bool isZero2 = (ee == '0');
-		if (pp == num[ctr] && ((ptr1 && ptr2) || (ptr1 && isZero2))) { 
+		if (isZero1 && ((ptr1 && ptr2) || (ptr1 && isZero2))) { 
 			//match found
 			++ctr;
 		}
