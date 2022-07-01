@@ -123,12 +123,17 @@ bool disambiguate(char* num, long l, long& ctr, char* tmpfile1, char* tmpfile2, 
 	fseek(tmp2, -cnt, SEEK_END);
 	while (cnt <= fpos) {
 		fscanf(tmp2, "%c", &pp);
+		cout << pp << endl;
 		fprintf(tmp3, "%c", pp);
 		++cnt;
 		fseek(tmp2, -cnt, SEEK_END);
 	}
 	fclose(tmp2);
 	fclose(tmp3);
+	cout << tmpfile1 << endl;
+	cout << tmpfile2 << endl;
+	cout << tmpfile3 << endl;
+	system("a=1;read a");
 	tmp3 = fopen64(tmpfile3, "r");
 	FILE* tmp1 = fopen64(tmpfile1, "r");
 	long _ctr = ctr;
@@ -151,7 +156,7 @@ bool disambiguate(char* num, long l, long& ctr, char* tmpfile1, char* tmpfile2, 
 	}
 	fclose(tmp1);
 	fclose(tmp3);
-	unlink(tmpfile3);
+	//unlink(tmpfile3);
 	if (ctr != _ctr) {
 		return true;
 	} else {
@@ -200,9 +205,9 @@ int main(int argc, char* argv[]) {
 			++counter;
 		} else if ((ptr1 && _ptr2) || (_ptr1 && ptr2) || (isZero1 && isZero2)) {
 			//ambiguous ; needs to be disambiguated
+			long fpos = ftello(tmp1);
 			fclose(tmp1);
 			fclose(tmp2);
-			long fpos = ftello(tmp1);
 			bool success = disambiguate(num, l, ctr, tmpfile1, tmpfile2, fpos);
 			tmp1 = fopen64(tmpfile1, "a");
 			tmp2 = fopen64(tmpfile2, "a");
