@@ -1,3 +1,4 @@
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -137,7 +138,7 @@ bool disambiguate(char* num, long l, long& ctr, char* tmpfile1, char* tmpfile2) 
 		if (ret1 == EOF) {
 			break;
 		}
-		char* ptr1 = strchr((char*)"1357", pp);
+		char* ptr1 = strchr((char*)"13579", pp);
 		char* ptr2 = strchr((char*)"2468", ee);
 		bool isZero1 = (pp == num[ctr]);
 		bool isZero2 = (ee == '0');
@@ -183,7 +184,7 @@ int main(int argc, char* argv[]) {
 		char pp = 0, ee = 0;
 		fscanf(fp, "%c", &pp);
 		fscanf(fe, "%c", &ee);
-		char* ptr1 = strchr((char*)"1357", pp);
+		char* ptr1 = strchr((char*)"13579", pp);
 		char* ptr2 = strchr((char*)"2468", ee);
 		bool isZero1 = (pp == '0');
 		bool isZero2 = (ee == '0');
@@ -201,6 +202,8 @@ int main(int argc, char* argv[]) {
 			fseek(tmp2, fpos, SEEK_SET);
 			if (success) {
 				//convert to binary
+				cout << counter << endl;
+				exit(2);
 				char* bnum = _bin(counter);
 				long lb = strlen(bnum);
 				if (t == 0) {
