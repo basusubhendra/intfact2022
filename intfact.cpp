@@ -202,7 +202,7 @@ int main(int argc, char* argv[]) {
 		cout << _prod_ << endl;
 		cout << _int_factor1 << endl;
 		cout << _int_factor2 << endl;
-		system("a=1;read a");
+		//system("a=1;read a");
 		if (strcmp(_prod_, num) == 0) {
 			printf("\n%s = %s X %s\n", num, _int_factor1, _int_factor2);
 			break;
