@@ -1,0 +1,1 @@
+g++ -o ./factorize intfact.cpp -lgmp `getconf LFS_CFLAGS` -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
