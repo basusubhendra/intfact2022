@@ -161,11 +161,15 @@ int main(int argc, char* argv[]) {
 	long l = strlen(num);
 	printf("\nNumber entered was %s\n", num);
 	long l_bin = 0, ctr =0;
+	//get the length of the binary representation
+	//of num while discarding the representation
+	//itself.
 	_bin(num, l_bin);
 	char* factor1 = (char*) calloc(l_bin, sizeof(char));
 	char* _factor1 = factor1;
 	char* factor2 = (char*) calloc(l_bin, sizeof(char));
-	int t = 0, counter = 0;
+	int t = 0;
+        long counter = 0;
 	long idx1 = 0, idx2 = l_bin - 1;
 	char tmpfile1[L_tmpnam + 1];
 	tmpnam(tmpfile1);
@@ -185,7 +189,7 @@ int main(int argc, char* argv[]) {
 		bool isZero2 = (ee == '0');
 		if ((ptr1 && ptr2) || (ptr1 && isZero2) || (isZero1 && ptr2)) { //already disambiguated
 			++counter;
-		} else if ((ptr1 && !ptr2) || (!ptr1 && ptr2) || (isZero1 || isZero2)) {
+		} else if ((ptr1 && !ptr2) || (!ptr1 && ptr2) || (isZero1 && isZero2)) {
 			//ambiguous ; needs to be disambiguated
 			fclose(tmp1);
 			fclose(tmp2);
@@ -196,17 +200,20 @@ int main(int argc, char* argv[]) {
 			fseek(tmp1, fpos, SEEK_SET);
 			fseek(tmp2, fpos, SEEK_SET);
 			if (success) {
+				//convert to binary
 				char* bnum = _bin(counter);
 				long lb = strlen(bnum);
 				if (t == 0) {
+					//direct copy
 					strcpy(factor1, bnum);
 					factor1 += lb;
 				} else if (t == 1) {
 					_copy_(factor2, idx2, bnum, lb);
 					idx2 -= lb;
 				}
+				//reset for the next cycle
 				counter = 0;
-				t = t - 1;
+				t = 1 - t;
 			}
 		}
 		char* _int_factor1 = _int(factor1);
