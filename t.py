@@ -1,13 +1,12 @@
 #!/usr/bin/python3
 import sys
-f = open("./e.txt","r")
-g = open("./_e.txt","w")
-f.read(2)
-g.write("20")
-while True:
-    c = str(f.read(1))
-    if not c or len(c) == 0 or c == "":
-        break
-    g.write(str(c))
+from zeros import zeros
+g=open("./_zeros.hpp", "w")
+g.write("int zeros[1000] = {")
+for x in range (0, 1000):
+    if x in zeros:
+        g.write("1,")
+    else:
+        g.write("0,")
+g.write("};")
 g.close()
-f.close()

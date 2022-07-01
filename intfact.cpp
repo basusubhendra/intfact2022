@@ -1,4 +1,3 @@
-#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,26 +5,28 @@
 #include <string>
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
+#include "primes.hpp"
+#include "zeros.hpp"
 using namespace std;
 using namespace boost;
 
-//convert a long integer input
-//to binary string.
-char* _bin(long x) {
-	std::string bstring = "";
+std::string _bin(int x, int param) {
 	if (x == 0) {
 		char* r = (char*) calloc(2, sizeof(char));
 		r[0] = '0';
 		r[1] = '\0';
 		return r;
 	}
+	std::string bstring = "";
 	while (x > 0) {
 		int rem = x % 2;
 		x /= 2;
 		bstring += boost::lexical_cast<std::string>(rem);
 	}
-	std::reverse(bstring.begin(), bstring.end());
-	return strdup((char*) bstring.c_str());
+	if (param == 0) {
+		std::reverse(bstring.begin(), bstring.end());
+	}
+	return bstring;
 }
 
 //convert a binary string to its 
@@ -56,7 +57,7 @@ char* _int(std::string b) {
 //return the product of two
 //arbitrary precision integers
 //x and y
-char* product(char* x, char* y) {
+char* _product(char* x, char* y) {
 	mpz_t xz;
 	mpz_init(xz);
 	mpz_set_str(xz, x, 10);
@@ -73,17 +74,7 @@ char* product(char* x, char* y) {
 	return product;
 }
 
-//This function ``searches'' for the digits of 
-//the number to be factored after reversing the 
-//digits of e when an ambiguous (odd-odd ;
-//even-even point) is encountered.
-//In case, a valid unambigous (even-odd;
-//odd-even) point of 
-//the number to be factored is found 
-//after reversing the digits of e,
-//the ambiguous point is said to be 
-//dis-ambiguated.
-bool disambiguate(char* num, long l, long& ctr, char* tmpfile1, char* tmpfile2, long fpos) {
+bool disambiguate(char* num, long l, char* tmpfile1, char* tmpfile2, long fpos, vector<long> prime_posits) {
 	FILE* tmp2 = fopen64(tmpfile2, "r");
 	char tmpfile3[L_tmpnam + 1];
 	tmpnam(tmpfile3);
@@ -103,30 +94,39 @@ bool disambiguate(char* num, long l, long& ctr, char* tmpfile1, char* tmpfile2, 
 	fclose(tmp3);
 	tmp3 = fopen64(tmpfile3, "r");
 	FILE* tmp1 = fopen64(tmpfile1, "r");
-	long _ctr = ctr;
+	long ctr = 0, pos = 0;
+	std::string factor1 = "";
+	std::string factor2 = "";
 	while (1) {
 		int ret1 = fscanf(tmp1, "%c", &pp);
 		int ret2 = fscanf(tmp3, "%c", &ee);
 		if (ret1 == EOF) {
 			break;
 		}
-		bool ptr1 = (strchr((char*)"13579", pp) != NULL);
-		bool _ptr1 = (strchr((char*)"2468", pp) != NULL);
-		bool ptr2 = (strchr((char*)"2468", ee) != NULL);
-		bool _ptr2 = (strchr((char*)"13579", ee) != NULL);
-		bool isZero1 = (pp == '0');
-		bool isZero2 = (ee == '0');
-		if ((pp == num[ctr % l]) && ((ptr1 && ptr2) || (_ptr1 && _ptr2) || ((ptr1 || _ptr1 || isZero1) && isZero2))) { 
-			//match found
+		if (pos == prime_posits[ctr]) {
+			std::string b_pp = _bin(pp-'0', 0);
+			std::string b_ee = _bin(ee-'0', 1);
+			factor1 += b_pp;
+			factor2 += b_ee;
 			++ctr;
 		}
+		++pos;
 	}
 	fclose(tmp1);
 	fclose(tmp3);
-	//unlink(tmpfile3);
-	if (ctr != _ctr) {
+	unlink(tmpfile3);
+	char* _int_factor1 = _int(factor1);
+	char* _int_factor2 = _int(factor2);
+	char* prod = _product(_int_factor1, _int_factor2);
+	if (strcmp(prod, num) == 0) {
+                free(prod);
+		free(_int_factor1);
+		free(_int_factor2);
 		return true;
 	} else {
+                free(prod);
+		free(_int_factor1);
+		free(_int_factor2);
 		return false;
 	}
 }
@@ -134,12 +134,8 @@ bool disambiguate(char* num, long l, long& ctr, char* tmpfile1, char* tmpfile2, 
 int main(int argc, char* argv[]) {
 	char* num = strdup(argv[1]);
 	long l = strlen(num);
+	long pos = 0;
 	printf("\nNumber entered was %s\n", num);
-	long ctr =0;
-	std::string factor1 = "";
-	std::string factor2 = "";
-	int t = 0;
-	long counter = 0;
 	char tmpfile1[L_tmpnam + 1];
 	tmpnam(tmpfile1);
 	char tmpfile2[L_tmpnam + 1];
@@ -148,65 +144,34 @@ int main(int argc, char* argv[]) {
 	FILE* fe = fopen64("./e.txt","r");
 	FILE* tmp1 = fopen64(tmpfile1, "w");
 	FILE* tmp2 = fopen64(tmpfile2, "w");
+	vector<long> prime_posits;
 	while (1) {
 		char pp = 0, ee = 0;
 		fscanf(fp, "%c", &pp);
 		fscanf(fe, "%c", &ee);
 		fprintf(tmp1, "%c", pp);
 		fprintf(tmp2, "%c", ee);
-		bool ptr1 = (strchr((char*)"13579", pp) != NULL);
-		bool _ptr1 = (strchr((char*)"2468", pp) != NULL);
-		bool ptr2 = (strchr((char*)"2468", ee) != NULL);
-		bool _ptr2 = (strchr((char*)"13579", ee) != NULL);
-		bool isZero1 = (pp == '0');
-		bool isZero2 = (ee == '0');
-		if ((ptr1 && _ptr2) || (_ptr1 && ptr2) || ((ptr1 || _ptr1) && isZero2) || (isZero1 && isZero2)) {
-			//ambiguous ; needs to be disambiguated
+		char nn = num[pos % l];
+		char try1[4];
+		try1[0] = pp;
+		try1[1] = nn;
+		try1[2] = ee;
+		try1[3] = '\0';
+		if (primes[atoi(try1)] == 1) {
+			prime_posits.push_back(pos);
 			long fpos = ftello(tmp1);
 			fclose(tmp1);
 			fclose(tmp2);
-			bool success = disambiguate(num, l, ctr, tmpfile1, tmpfile2, fpos);
+			bool success = disambiguate(num, l, tmpfile1, tmpfile2, fpos, prime_posits);
 			tmp1 = fopen64(tmpfile1, "a");
 			tmp2 = fopen64(tmpfile2, "a");
 			fseek(tmp1, fpos, SEEK_SET);
-			fseek(tmp2, fpos, SEEK_SET);
+		        fseek(tmp2, fpos, SEEK_SET);	
 			if (success) {
-				cout << "\npp\t" << pp << "\tee\t" << ee << "\n";
-				if (t == 0) {
-					cout << "Here1\n";
-					if (counter > 0) {
-						char* bnum = _bin(counter);
-						cout << "counter:\t"<< counter << "\t" << t << "\t" << bnum << endl;
-						factor1 += bnum;
-						cout << factor1 << endl;
-					}
-				} else if (t == 1) {
-					if (counter > 0) {
-						char* bnum = _bin(counter);
-						cout << "counter:\t"<< counter << "\t" << t << "\t" << bnum << endl;
-						factor2 += bnum;
-						std::string(factor2.begin(), factor2.end());
-						cout << factor2 << endl;
-					}
-				}
-				//reset for the next cycle
-				counter = 0;
-				t = 1 - t;
+				break;
 			}
-		} else  if ((ptr1 && ptr2) || (_ptr1 && _ptr2) || ((ptr1 || _ptr1) && isZero2) || (isZero1 && (ptr2 || _ptr2))) { //already disambiguated
-			++counter;
 		}
-		char* _int_factor1 = _int(factor1);
-		char* _int_factor2 = _int(factor2);
-		char* _prod_ = product(_int_factor1, _int_factor2);
-		cout << _prod_ << endl;
-		cout << _int_factor1 << endl;
-		cout << _int_factor2 << endl;
-		system("a=1;read a");
-		if (strcmp(_prod_, num) == 0) {
-			printf("\n%s = %s X %s\n", num, _int_factor1, _int_factor2);
-			break;
-		}
+		pos++;
 	}
 	fclose(tmp1);
 	fclose(tmp2);
