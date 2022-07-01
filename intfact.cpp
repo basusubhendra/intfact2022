@@ -111,18 +111,18 @@ void* _copy_(char* factor2, long idx, char* bnum, long lb) {
 //after reversing the digits of e,
 //the ambiguous point is said to be 
 //dis-ambiguated.
-bool disambiguate(char* num, long l, long& ctr, char* tmpfile1, char* tmpfile2) {
+bool disambiguate(char* num, long l, long& ctr, char* tmpfile1, char* tmpfile2, long fpos) {
 	FILE* tmp2 = fopen64(tmpfile2, "r");
 	char tmpfile3[L_tmpnam + 1];
 	tmpnam(tmpfile3);
 	FILE* tmp3 = fopen64(tmpfile3, "w");
 	//read from tmpfile2 and write it
 	//in reverse to tmpfile3.
-	int ret = 0;
 	char pp = 0, ee = 0;
 	long cnt = 1;
 	fseek(tmp2, -cnt, SEEK_END);
-	while ((ret = fscanf(tmp2, "%c", &pp)) != EOF) {
+	while (cnt <= fpos) {
+		fscanf(tmp2, "%c", &pp);
 		fprintf(tmp3, "%c", pp);
 		++cnt;
 		fseek(tmp2, -cnt, SEEK_END);
@@ -196,14 +196,14 @@ int main(int argc, char* argv[]) {
 		bool _ptr2 = (strchr((char*)"13579", ee) != NULL);
 		bool isZero1 = (pp == '0');
 		bool isZero2 = (ee == '0');
-		if ((ptr1 && ptr2) || (_ptr1 && _ptr2) || ((ptr1 || ptr2 || _ptr1 || _ptr2) && isZero2) || (isZero1 && (ptr1 || ptr2 || _ptr1 || _ptr2))) { //already disambiguated
+		if ((ptr1 && ptr2) || (_ptr1 && _ptr2) || ((ptr1 || _ptr1) && isZero2) || (isZero1 && (ptr2 || _ptr2))) { //already disambiguated
 			++counter;
 		} else if ((ptr1 && _ptr2) || (_ptr1 && ptr2) || (isZero1 && isZero2)) {
 			//ambiguous ; needs to be disambiguated
 			fclose(tmp1);
 			fclose(tmp2);
 			long fpos = ftello(tmp1);
-			bool success = disambiguate(num, l, ctr, tmpfile1, tmpfile2);
+			bool success = disambiguate(num, l, ctr, tmpfile1, tmpfile2, fpos);
 			tmp1 = fopen64(tmpfile1, "a");
 			tmp2 = fopen64(tmpfile2, "a");
 			fseek(tmp1, fpos, SEEK_SET);
@@ -214,7 +214,7 @@ int main(int argc, char* argv[]) {
 				long lb = strlen(bnum);
 				if (t == 0) {
 					//direct copy
-					strcpy(factor1, bnum);
+					strcpy(factor1+idx1, bnum);
 					idx1 += lb;
 				} else if (t == 1) {
 					_copy_(factor2, idx2, bnum, lb);
@@ -225,8 +225,8 @@ int main(int argc, char* argv[]) {
 				t = 1 - t;
 			}
 		}
-		char* _int_factor1 = _int(factor1);
-		char* _int_factor2 = _int(factor2);
+		char* _int_factor1 = _int(_factor1);
+		char* _int_factor2 = _int(factor2+idx2);
 		char* _prod_ = product(_int_factor1, _int_factor2);
 		cout << _prod_ << endl;
 		cout << _int_factor1 << endl;
