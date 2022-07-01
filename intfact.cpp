@@ -138,11 +138,13 @@ bool disambiguate(char* num, long l, long& ctr, char* tmpfile1, char* tmpfile2) 
 		if (ret1 == EOF) {
 			break;
 		}
-		char* ptr1 = strchr((char*)"13579", pp);
-		char* ptr2 = strchr((char*)"2468", ee);
+		bool ptr1 = (strchr((char*)"13579", pp) != NULL);
+		bool _ptr1 = (strchr((char*)"2468", pp) != NULL);
+		bool ptr2 = (strchr((char*)"2468", ee) != NULL);
+		bool _ptr2 = (strchr((char*)"13579", ee) != NULL);
 		bool isZero1 = (pp == num[ctr]);
 		bool isZero2 = (ee == '0');
-		if (isZero1 && ((ptr1 && ptr2) || (ptr1 && isZero2))) { 
+		if (isZero1 && ((ptr1 && ptr2) || (_ptr1 && _ptr2) || ((ptr1 || _ptr1) && isZero2))) { 
 			//match found
 			++ctr;
 		}
@@ -168,7 +170,9 @@ int main(int argc, char* argv[]) {
 	_bin(num, l_bin);
 	char* factor1 = (char*) calloc(l_bin, sizeof(char));
 	char* _factor1 = factor1;
+					factor1[l_bin] = '\0';
 	char* factor2 = (char*) calloc(l_bin, sizeof(char));
+					factor2[l_bin] = '\0';
 	int t = 0;
         long counter = 0;
 	long idx1 = 0, idx2 = l_bin - 1;
@@ -184,13 +188,17 @@ int main(int argc, char* argv[]) {
 		char pp = 0, ee = 0;
 		fscanf(fp, "%c", &pp);
 		fscanf(fe, "%c", &ee);
-		char* ptr1 = strchr((char*)"13579", pp);
-		char* ptr2 = strchr((char*)"2468", ee);
+		fprintf(tmp1, "%c", pp);
+		fprintf(tmp2, "%c", ee);
+		bool ptr1 = (strchr((char*)"13579", pp) != NULL);
+		bool _ptr1 = (strchr((char*)"2468", pp) != NULL);
+		bool ptr2 = (strchr((char*)"2468", ee) != NULL);
+		bool _ptr2 = (strchr((char*)"13579", ee) != NULL);
 		bool isZero1 = (pp == '0');
 		bool isZero2 = (ee == '0');
-		if ((ptr1 && ptr2) || (ptr1 && isZero2) || (isZero1 && ptr2)) { //already disambiguated
+		if ((ptr1 && ptr2) || (_ptr1 && _ptr2) || ((ptr1 || ptr2 || _ptr1 || _ptr2) && isZero2) || (isZero1 && (ptr1 || ptr2 || _ptr1 || _ptr2))) { //already disambiguated
 			++counter;
-		} else if ((ptr1 && !ptr2) || (!ptr1 && ptr2) || (isZero1 && isZero2)) {
+		} else if ((ptr1 && _ptr2) || (_ptr1 && ptr2) || (isZero1 && isZero2)) {
 			//ambiguous ; needs to be disambiguated
 			fclose(tmp1);
 			fclose(tmp2);
@@ -202,14 +210,12 @@ int main(int argc, char* argv[]) {
 			fseek(tmp2, fpos, SEEK_SET);
 			if (success) {
 				//convert to binary
-				cout << counter << endl;
-				exit(2);
 				char* bnum = _bin(counter);
 				long lb = strlen(bnum);
 				if (t == 0) {
 					//direct copy
 					strcpy(factor1, bnum);
-					factor1 += lb;
+					idx1 += lb;
 				} else if (t == 1) {
 					_copy_(factor2, idx2, bnum, lb);
 					idx2 -= lb;
@@ -222,6 +228,10 @@ int main(int argc, char* argv[]) {
 		char* _int_factor1 = _int(factor1);
 		char* _int_factor2 = _int(factor2);
 		char* _prod_ = product(_int_factor1, _int_factor2);
+		cout << _prod_ << endl;
+		cout << _int_factor1 << endl;
+		cout << _int_factor2 << endl;
+		system("a=1;read a");
 		if (strcmp(_prod_, num) == 0) {
 			printf("\n%s = %s X %s\n", num, _int_factor1, _int_factor2);
 			break;
