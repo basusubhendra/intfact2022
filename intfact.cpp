@@ -97,17 +97,39 @@ bool disambiguate(char* num, long l, char* tmpfile1, char* tmpfile2, long fpos, 
 	long ctr = 0, pos = 0;
 	std::string factor1 = "";
 	std::string factor2 = "";
+	long last_pos = -1, acc1 = 0, acc2 = 0;
+	vector<int> higher_sums;
+	vector<int> lower_sums;
 	while (1) {
 		int ret1 = fscanf(tmp1, "%c", &pp);
 		int ret2 = fscanf(tmp3, "%c", &ee);
 		if (ret1 == EOF) {
 			break;
 		}
+		int pk = pp - '0';
+		if (pk == 0) {
+			pk = 10;
+		}
+		int ek = ee - '0';
+		if (ek == 0) {
+			ek = 10;
+		}
 		if (pos == prime_posits[ctr]) {
-			std::string b_pp = _bin(pp-'0', 0);
-			std::string b_ee = _bin(ee-'0', 1);
-			factor1 += b_pp;
-			factor2 += b_ee;
+			if (last_pos == -1) {
+				acc1 += pk;
+				acc2 += ek;
+			} else if (pos == last_pos + 1) {
+				acc1 += pk;
+				acc2 += ek;
+			} else {
+				std::string b_pp = _bin(acc1, 0);
+				std::string b_ee = _bin(acc2, 1);
+				acc1 = 0;
+				acc2 = 0;
+				factor1 += b_pp;
+				factor2 += b_ee;
+			}
+			last_pos = pos;
 			++ctr;
 		}
 		++pos;
