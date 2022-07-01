@@ -25,7 +25,9 @@ void* _bin(char* num, long& l_bin) {
 	return 0;
 }
 
-char* _bin(int x) {
+//convert a long integer input
+//to binary string.
+char* _bin(long x) {
 	std::string bstring = "";
 	if (x == 0) {
 		char* r = (char*) calloc(2, sizeof(char));
@@ -42,6 +44,8 @@ char* _bin(int x) {
 	return strdup((char*) bstring.c_str());
 }
 
+//convert a binary string to its 
+//arbitrary precision integer equivalent
 char* _int(char* b) {
 	mpz_t sum;
 	mpz_init(sum);
@@ -65,6 +69,9 @@ char* _int(char* b) {
 	return int_num;
 }
 
+//return the product of two
+//arbitrary precision integers
+//x and y
 char* product(char* x, char* y) {
 	mpz_t xz;
 	mpz_init(xz);
