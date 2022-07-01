@@ -89,14 +89,27 @@ char* product(char* x, char* y) {
 	return product;
 }
 
+//copy bnum bit by bit from 0 to lb
+//onto factor2 indices idx downto idx-lb 
+//the right bound being exclusive.
 void* _copy_(char* factor2, long idx, char* bnum, long lb) {
         long cnt = 0;
-	for (int i = idx; i >= idx-lb; --i) {
+	for (int i = idx; i > idx-lb; --i) {
 		factor2[idx] = bnum[cnt++];
 	}
 	return 0;
 }
 
+//This function ``searches'' for the digits of 
+//the number to be factored after reversing the 
+//digits of e when an ambiguous (odd-odd ;
+//even-even point) is encountered.
+//In case, a valid unambigous (even-odd;
+//odd-even) point of 
+//the number to be factored is found 
+//after reversing the digits of e,
+//the ambiguous point is said to be 
+//dis-ambiguated.
 bool disambiguate(char* num, long l, long& ctr, char* tmpfile1, char* tmpfile2) {
 	FILE* tmp2 = fopen64(tmpfile2, "r");
 	char tmpfile3[L_tmpnam + 1];
