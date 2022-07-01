@@ -116,7 +116,7 @@ bool disambiguate(char* num, long l, long& ctr, char* tmpfile1, char* tmpfile2, 
 		bool _ptr2 = (strchr((char*)"13579", ee) != NULL);
 		bool isZero1 = (pp == '0');
 		bool isZero2 = (ee == '0');
-		if ((pp == num[ctr]) && ((ptr1 && ptr2) || (_ptr1 && _ptr2) || ((ptr1 || _ptr1 || isZero1) && isZero2))) { 
+		if ((pp == num[ctr % l]) && ((ptr1 && ptr2) || (_ptr1 && _ptr2) || ((ptr1 || _ptr1 || isZero1) && isZero2))) { 
 			//match found
 			++ctr;
 		}
@@ -160,9 +160,7 @@ int main(int argc, char* argv[]) {
 		bool _ptr2 = (strchr((char*)"13579", ee) != NULL);
 		bool isZero1 = (pp == '0');
 		bool isZero2 = (ee == '0');
-		if ((ptr1 && ptr2) || (_ptr1 && _ptr2) || ((ptr1 || _ptr1) && isZero2) || (isZero1 && (ptr2 || _ptr2))) { //already disambiguated
-			++counter;
-		} else if ((ptr1 && _ptr2) || (_ptr1 && ptr2) || (isZero1 && isZero2)) {
+		if ((ptr1 && _ptr2) || (_ptr1 && ptr2) || ((ptr1 || _ptr1) && isZero2) || (isZero1 && isZero2)) {
 			//ambiguous ; needs to be disambiguated
 			long fpos = ftello(tmp1);
 			fclose(tmp1);
@@ -173,6 +171,7 @@ int main(int argc, char* argv[]) {
 			fseek(tmp1, fpos, SEEK_SET);
 			fseek(tmp2, fpos, SEEK_SET);
 			if (success) {
+				cout << "\npp\t" << pp << "\tee\t" << ee << "\n";
 				if (t == 0) {
 					cout << "Here1\n";
 					if (counter > 0) {
@@ -194,6 +193,8 @@ int main(int argc, char* argv[]) {
 				counter = 0;
 				t = 1 - t;
 			}
+		} else  if ((ptr1 && ptr2) || (_ptr1 && _ptr2) || ((ptr1 || _ptr1) && isZero2) || (isZero1 && (ptr2 || _ptr2))) { //already disambiguated
+			++counter;
 		}
 		char* _int_factor1 = _int(factor1);
 		char* _int_factor2 = _int(factor2);
