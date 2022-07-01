@@ -9,23 +9,6 @@
 using namespace std;
 using namespace boost;
 
-//returns the length of the binary
-//equivalent string of the number
-//to be factored.  Note that the 
-//binary value per se is not used 
-//here.
-void* _bin(char* num, long& l_bin) {
-	mpz_t nz;
-	mpz_init(nz);
-	mpz_set_str(nz, num, 10);
-	while (mpz_cmp_si(nz, 0) > 0) {
-		mpz_div_ui(nz, nz, 2);
-		++l_bin; //pass by reference
-	}
-	mpz_clear(nz);
-	return 0;
-}
-
 //convert a long integer input
 //to binary string.
 char* _bin(long x) {
@@ -47,7 +30,7 @@ char* _bin(long x) {
 
 //convert a binary string to its 
 //arbitrary precision integer equivalent
-char* _int(char* b) {
+char* _int(std::string b) {
 	mpz_t sum;
 	mpz_init(sum);
 	mpz_set_si(sum, 0);
@@ -56,7 +39,7 @@ char* _int(char* b) {
 	mpz_t prod;
 	mpz_init(prod);
 	mpz_set_ui(prod, 1);
-	long l = strlen(b);
+	long l = b.size();
 	for (int i = l - 1; i >= 0; --i) {
 		int bk = b[i] - '0';
 		mpz_mul_ui(term, prod, bk);
@@ -88,18 +71,6 @@ char* product(char* x, char* y) {
 	char* product =  strdup(mpz_get_str(0, 10, prod));
 	mpz_clear(prod);
 	return product;
-}
-
-//reverse a string
-char* strrev(char* x) { 
-    char* s = strdup(x);
-    long l = strlen(s);
-    for (int i = 0; i < l / 2; ++i) {
-	    char t = s[i];
-	    s[i] = s[l - 1 - i];
-	    s[l - 1 - i] = t;
-    }
-    return s;
 }
 
 //This function ``searches'' for the digits of 
@@ -169,20 +140,11 @@ int main(int argc, char* argv[]) {
 	char* num = strdup(argv[1]);
 	long l = strlen(num);
 	printf("\nNumber entered was %s\n", num);
-	long l_bin = 0, ctr =0;
-	//get the length of the binary representation
-	//of num while discarding the representation
-	//itself.
-	_bin(num, l_bin);
-	char* factor1 = (char*) calloc(l_bin, sizeof(char));
-	char* _factor1 = factor1;
-	factor1[l_bin] = '\0';
-	char* factor2 = (char*) calloc(l_bin, sizeof(char));
-	char* _factor2 = factor2;
-	factor2[l_bin] = '\0';
+	long ctr =0;
+	std::string factor1 = "";
+	std::string factor2 = "";
 	int t = 0;
 	long counter = 0;
-	long idx1 = 0, idx2 = l_bin - 1;
 	char tmpfile1[L_tmpnam + 1];
 	tmpnam(tmpfile1);
 	char tmpfile2[L_tmpnam + 1];
@@ -222,34 +184,24 @@ int main(int argc, char* argv[]) {
 					cout << "Here1\n";
 					if (counter > 0) {
 						char* bnum = _bin(counter);
-						long lb = strlen(bnum);
-						cout << "counter:\t"<< counter << "\t" << t << endl;
-						strcpy(factor1+idx1, bnum);
-						idx1 += lb;
-						factor1[idx1] = '\0';
-						counter = 0;
-						t = 1 - t;
+						cout << "counter:\t"<< counter << "\t" << t << "\t" << bnum << endl;
+						factor1 += bnum;
 					}
 				} else if (t == 1) {
 					if (counter > 0) {
 						char* bnum = _bin(counter);
-						long lb = strlen(bnum);
-						cout << "counter:\t"<< counter << "\t" << t << endl;
-						cout << "Here2\n";
-						strcpy(factor2+idx2, bnum);
-						idx2 += lb;
-						factor2[idx2] = '\0';
-						counter = 0;
-						t = 1 - t;
+						cout << "counter:\t"<< counter << "\t" << t << "\t" << bnum << endl;
+						factor2 += bnum;
+						std::string(factor2.begin(), factor2.end());
 					}
 				}
 				//reset for the next cycle
+				counter = 0;
+				t = 1 - t;
 			}
 		}
-		char* _int_factor1 = _int(_factor1);
-		char* tmp_factor = strrev(_factor2);
-		char* _int_factor2 = _int(tmp_factor);
-		free(tmp_factor);
+		char* _int_factor1 = _int(factor1);
+		char* _int_factor2 = _int(factor2);
 		char* _prod_ = product(_int_factor1, _int_factor2);
 		cout << _prod_ << endl;
 		cout << _int_factor1 << endl;
