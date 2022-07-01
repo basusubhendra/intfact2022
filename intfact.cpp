@@ -95,17 +95,12 @@ bool disambiguate(char* num, long l, long& ctr, char* tmpfile1, char* tmpfile2, 
 	fseek(tmp2, -cnt, SEEK_END);
 	while (cnt <= fpos) {
 		fscanf(tmp2, "%c", &pp);
-		cout << pp << endl;
 		fprintf(tmp3, "%c", pp);
 		++cnt;
 		fseek(tmp2, -cnt, SEEK_END);
 	}
 	fclose(tmp2);
 	fclose(tmp3);
-	cout << tmpfile1 << endl;
-	cout << tmpfile2 << endl;
-	cout << tmpfile3 << endl;
-	system("a=1;read a");
 	tmp3 = fopen64(tmpfile3, "r");
 	FILE* tmp1 = fopen64(tmpfile1, "r");
 	long _ctr = ctr;
@@ -178,14 +173,13 @@ int main(int argc, char* argv[]) {
 			fseek(tmp1, fpos, SEEK_SET);
 			fseek(tmp2, fpos, SEEK_SET);
 			if (success) {
-				//convert to binary
 				if (t == 0) {
-					//direct copy
 					cout << "Here1\n";
 					if (counter > 0) {
 						char* bnum = _bin(counter);
 						cout << "counter:\t"<< counter << "\t" << t << "\t" << bnum << endl;
 						factor1 += bnum;
+						cout << factor1 << endl;
 					}
 				} else if (t == 1) {
 					if (counter > 0) {
@@ -193,6 +187,7 @@ int main(int argc, char* argv[]) {
 						cout << "counter:\t"<< counter << "\t" << t << "\t" << bnum << endl;
 						factor2 += bnum;
 						std::string(factor2.begin(), factor2.end());
+						cout << factor2 << endl;
 					}
 				}
 				//reset for the next cycle
