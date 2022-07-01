@@ -3,19 +3,23 @@
 #include <string.h>
 #include <gmp.h>
 #include <string>
-#include <string>
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
 using namespace std;
 using namespace boost;
 
+//returns the length of the binary
+//equivalent string of the number
+//to be factored.  Note that the 
+//binary value per se is not used 
+//here.
 void* _bin(char* num, long& l_bin) {
 	mpz_t nz;
 	mpz_init(nz);
 	mpz_set_str(nz, num, 10);
 	while (mpz_cmp_si(nz, 0) > 0) {
 		mpz_div_ui(nz, nz, 2);
-		++l_bin;
+		++l_bin; //pass by reference
 	}
 	mpz_clear(nz);
 	return 0;
